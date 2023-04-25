@@ -1,8 +1,18 @@
 const express = require("express");
+const passport = require("passport");
+const GoogleStrategy = require("passport-google-oauth20").Strategy;
+const config = require("./config/keys");
 const app = express();
 
-app.get("/", (req, res) => {
-    res.send({ msg: "Hello World!" });
-})
+passport.use(new GoogleStrategy(
+    {
+        clientID: config.googleClientId,
+        clientSecret: config.googleClientSecret,
+        callbackURL: "/auth/google/callback"
+    },
+    (accessToken) => {
+        console.log(accessToken);
+    }
+));
 
 app.listen(5000);
