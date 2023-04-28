@@ -13,6 +13,38 @@ passport.use(new GoogleStrategy(
         callbackURL: "/auth/google/callback"
     },
     (accessToken, refreshToken, profile, done) => {
-        new User({ googleId: profile.id }).save();
+        User.findOne({ googleId: profile.id })
+            .then((existingUser) => {
+                if (existingUser) {
+                    console.log("Already sign in");
+                    done(null, existingUser);
+                }
+                else {
+                    new User({ googleId: profile.id }).save()
+                        .then(user => done(null, user));
+                }
+            });
     }
 ));
+
+/*
+    After complete the authentication, passport will give back a cookie that
+    contain user id to identify the user. Below method will be called immediately to do so.
+*/
+passport.serializeUser((user, done) => {
+    done(null, user.id);
+});
+
+/*
+    When any request come in, the flow will be:
+        1. cookie-session will extract the cookie
+        2. Passport will get user id from cookie
+        3. Below method will use this id to get User data from mongo
+        4. User data will be attach to user property of req (req.user)
+*/
+passport.deserializeUser((id, done) => {
+    User.findById(id)
+        .then(user => {
+            done(null, user)
+        });
+});
