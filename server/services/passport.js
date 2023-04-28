@@ -1,5 +1,6 @@
 const passport = require("passport");
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
+const FacebookStrategy = require("passport-facebook").Strategy;
 const mongoose = require("mongoose");
 
 const config = require("../config/keys");
@@ -13,19 +14,40 @@ passport.use(new GoogleStrategy(
         callbackURL: "/auth/google/callback"
     },
     (accessToken, refreshToken, profile, done) => {
-        User.findOne({ googleId: profile.id })
+        User.findOne({ providerUserId: profile.id })
             .then((existingUser) => {
                 if (existingUser) {
                     console.log("Already sign in");
                     done(null, existingUser);
                 }
                 else {
-                    new User({ googleId: profile.id }).save()
+                    new User({ providerUserId: profile.id, provider: "google" }).save()
                         .then(user => done(null, user));
                 }
             });
     }
 ));
+
+passport.use(new FacebookStrategy(
+    {
+        clientID: config.facebookClientId,
+        clientSecret: config.facebookClientSecret,
+        callbackURL: `${config.hostName}/auth/facebook/callback`
+    },
+    (accessToken, refreshToken, profile, done) => {
+        User.findOne({ providerUserId: profile.id })
+            .then((existingUser) => {
+                if (existingUser) {
+                    console.log("Already sign in");
+                    done(null, existingUser);
+                }
+                else {
+                    new User({ providerUserId: profile.id, provider: "facebook" }).save()
+                        .then(user => done(null, user));
+                }
+            });
+    }
+))
 
 /*
     After complete the authentication, passport will give back a cookie that
