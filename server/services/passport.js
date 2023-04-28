@@ -11,7 +11,7 @@ passport.use(new GoogleStrategy(
     {
         clientID: config.googleClientId,
         clientSecret: config.googleClientSecret,
-        callbackURL: "/auth/google/callback"
+        callbackURL: config.googleRedirecturl
     },
     (accessToken, refreshToken, profile, done) => {
         User.findOne({ providerUserId: profile.id })
@@ -32,7 +32,7 @@ passport.use(new FacebookStrategy(
     {
         clientID: config.facebookClientId,
         clientSecret: config.facebookClientSecret,
-        callbackURL: `${config.hostName}/auth/facebook/callback`
+        callbackURL: config.facebookRedirecturl
     },
     (accessToken, refreshToken, profile, done) => {
         User.findOne({ providerUserId: profile.id })
