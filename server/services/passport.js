@@ -11,7 +11,8 @@ passport.use(new GoogleStrategy(
     {
         clientID: config.googleClientId,
         clientSecret: config.googleClientSecret,
-        callbackURL: config.googleRedirecturl
+        callbackURL: config.googleRedirecturl,
+        proxy: true
     },
     (accessToken, refreshToken, profile, done) => {
         User.findOne({ providerUserId: profile.id })
