@@ -3,6 +3,7 @@ import { connect } from "react-redux";
 import { Link } from 'react-router-dom';
 
 import * as actions from "../actions";
+import StripeCheckoutForm from "./StripeCheckoutForm";
 
 class Header extends Component {
     renderNavBar() {
@@ -12,7 +13,11 @@ class Header extends Component {
             case false:
                 return <li><a href="/auth/google">Login with Google</a></li>;
             default:
-                return <li><a href="/api/logout">Logout</a></li>;
+                return [
+                    <li key="payment"><StripeCheckoutForm /></li>,
+                    <li key="credit" style={{ margin: '0 10px' }}>Credits: {this.props.auth.credit}</li>,
+                    <li key="auth"><a href="/api/logout">Logout</a></li>
+                ];
         };
     }
 
