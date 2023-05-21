@@ -25,4 +25,15 @@ app.use(passport.session());
 require('./routes/authRoutes')(app);
 require("./routes/paymentRoutes")(app);
 
+if (process.env.NODE_ENV === "production") {
+    // serve react app
+    app.use(express.static("client/build"));
+
+    // if no match path, return index.html
+    const path = require("path");
+    app.get("*", (req, res) => {
+        res.sendFile(path.resolve(__dirname, "client", "build", "index.html"));
+    });
+}
+
 app.listen(5000);
