@@ -14,18 +14,8 @@ passport.use(new GoogleStrategy(
         callbackURL: config.googleRedirecturl,
         proxy: true
     },
-    (accessToken, refreshToken, profile, done) => {
-        User.findOne({ providerUserId: profile.id })
-            .then((existingUser) => {
-                if (existingUser) {
-                    console.log("Already sign in");
-                    done(null, existingUser);
-                }
-                else {
-                    new User({ providerUserId: profile.id, provider: "google" }).save()
-                        .then(user => done(null, user));
-                }
-            });
+    async (accessToken, refreshToken, profile, done) => {
+        await handleUserAuth(profile, done);
     }
 ));
 
@@ -35,20 +25,21 @@ passport.use(new FacebookStrategy(
         clientSecret: config.facebookClientSecret,
         callbackURL: config.facebookRedirecturl
     },
-    (accessToken, refreshToken, profile, done) => {
-        User.findOne({ providerUserId: profile.id })
-            .then((existingUser) => {
-                if (existingUser) {
-                    console.log("Already sign in");
-                    done(null, existingUser);
-                }
-                else {
-                    new User({ providerUserId: profile.id, provider: "facebook" }).save()
-                        .then(user => done(null, user));
-                }
-            });
+    async (accessToken, refreshToken, profile, done) => {
+        await handleUserAuth(profile, done);
     }
 ))
+
+const handleUserAuth = async (profile, done) => {
+    const existingUser = await User.findOne({ providerUserId: profile.id });
+
+    if (existingUser) {
+        return done(null, existingUser);
+    }
+
+    const user = await new User({ providerUserId: profile.id, provider: "facebook" }).save();
+    done(null, user);
+}
 
 /*
     After complete the authentication, passport will give back a cookie that
